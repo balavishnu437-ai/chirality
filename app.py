@@ -46,7 +46,7 @@ elif st.session_state.page == "app":
 
         centers = []
 
-        for i in range(1, 32):  # 31 chiral centers
+        for i in range(1, 9):  # 31 chiral centers
             config = "R" if i % 2 == 0 else "S"
 
             centers.append({

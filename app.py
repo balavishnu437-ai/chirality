@@ -1,73 +1,64 @@
 import streamlit as st
 from rdkit import Chem
 
-# -------------------------------
-# SESSION CONTROL (for page switch)
-# -------------------------------
-if "page" not in st.session_state:
-    st.session_state.page = "home"
+# -------------------------
+# Page Title
+# -------------------------
+st.set_page_config(page_title="Drug Chirality Analyzer")
 
-# -------------------------------
-# HOME PAGE (Your Details)
-# -------------------------------
-if st.session_state.page == "home":
-    
-    st.title("🧪 Drug Chirality Analyzer Project")
+st.title("🧪 Drug Chirality Analyzer")
 
-    st.markdown("### 👨‍🎓 Student Details")
-    st.write("**Name:** Vishnu")  # <-- change this
-    st.write("**Register No:** 123456")  # <-- change this
-    st.write("**Class:** B.Sc Chemistry")  # <-- change this
+st.write("Analyze chiral carbons and R/S configuration in drug molecules")
 
-    st.markdown("---")
-    
-    st.write("This project detects chiral carbons and their R/S configuration in drug molecules.")
+# -------------------------
+# Drug Info
+# -------------------------
+st.subheader("💊 Drug: Rifampicin")
 
-    if st.button("🚀 Enter Project"):
-        st.session_state.page = "app"
+# SMILES for Rifampicin (contains multiple chiral centers)
+default_smiles = "CC1=C(C(=O)NC(=O)[C@@H]2[C@H](O)[C@@H](O)[C@H](O)[C@H](O2)CO)C(=O)C3=C(C1=O)C4=C(C=C3O)C(=O)C5=C(C4=O)C=CC(=C5O)OC6=C(C=CC(=C6O)OC)OC"
 
-# -------------------------------
-# MAIN APP PAGE
-# -------------------------------
-elif st.session_state.page == "app":
+smiles = st.text_input("Enter SMILES:", default_smiles)
 
-    st.title("🔬 Chirality Analyzer")
+# -------------------------
+# Function
+# -------------------------
+def analyze_chirality(smiles):
+    mol = Chem.MolFromSmiles(smiles)
 
-    st.write("Enter a SMILES string to detect chiral centers")
+    if mol is None:
+        return "❌ Invalid SMILES"
 
-    smiles = st.text_input(
-        "SMILES Input",
-        "COc1ccc2c(c1)CCN(C[C@H]3CCc4cc(OC)c(OC)cc4C3)C2"
+    mol = Chem.AddHs(mol)
+
+    Chem.AssignAtomChiralTagsFromStructure(mol)
+    Chem.AssignStereochemistry(mol, force=True, cleanIt=True)
+
+    chiral_centers = Chem.FindMolChiralCenters(
+        mol,
+        includeUnassigned=True,
+        useLegacyImplementation=False
     )
 
-    def analyze_chirality(smiles):
-        mol = Chem.MolFromSmiles(smiles)
+    if not chiral_centers:
+        return "❌ No chiral centers found"
 
-        if mol is None:
-            return "❌ Invalid SMILES"
+    result = ""
+    for idx, config in chiral_centers:
+        result += f"🧪 Atom Index {idx} → Configuration: {config}\n"
 
-        mol = Chem.AddHs(mol)
-        Chem.AssignStereochemistry(mol, force=True, cleanIt=True)
+    return result
 
-        chiral_centers = Chem.FindMolChiralCenters(
-            mol,
-            includeUnassigned=True,
-            useLegacyImplementation=False
-        )
+# -------------------------
+# Button
+# -------------------------
+if st.button("Analyze Chirality"):
+    result = analyze_chirality(smiles)
 
-        if not chiral_centers:
-            return "❌ No chiral centers found"
+    st.subheader("🔬 Result")
+    st.text(result)
 
-        result = ""
-        for idx, config in chiral_centers:
-            result += f"🧪 Atom {idx} → {config}\n"
-
-        return result
-
-    if st.button("Analyze"):
-        result = analyze_chirality(smiles)
-        st.text(result)
-
-    # Back button
-    if st.button("⬅ Back to Home"):
-        st.session_state.page = "home"
+    st.info(
+        "Rifampicin has multiple chiral centers. "
+        "Each center has R or S configuration based on 3D arrangement."
+    )

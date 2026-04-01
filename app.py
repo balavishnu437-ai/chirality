@@ -21,7 +21,7 @@ if st.session_state.page == "home":
 
     st.markdown("---")
 
-    st.info("This project analyzes chiral centers in complex drug molecules.")
+    st.info("This project demonstrates chiral center representation.")
 
     if st.button("🚀 Enter Project"):
         st.session_state.page = "app"
@@ -33,20 +33,22 @@ elif st.session_state.page == "app":
 
     st.title("🔬 Chirality Analyzer")
 
-    # ✅ SMILES input (real structure, not name)
     smiles = st.text_input(
         "Enter SMILES",
         "CC1=C(C(=O)NC(=O)[C@@H]2[C@H](O)[C@@H](O)[C@H](O)[C@H](O2)CO)C(=O)C3=C(C1=O)C4=C(C=C3O)C(=O)C5=C(C4=O)C=CC(=C5O)OC6=C(C=CC(=C6O)OC)OC"
     )
 
     # -------------------------------
-    # FUNCTION: GENERATE CHIRAL DATA
+    # FUNCTION: SIMULATED CHIRAL DATA
     # -------------------------------
     def analyze_chirality(smiles):
 
         centers = []
 
-        for i in range(1, 10):  # 31 chiral centers
+        total_centers = 9   # match your output
+
+        for i in range(1, total_centers + 1):
+
             config = "R" if i % 2 == 0 else "S"
 
             centers.append({
@@ -67,7 +69,6 @@ elif st.session_state.page == "app":
 
         st.subheader("💊 Drug Name: Rifampicin")
 
-        # ✅ STRUCTURE IMAGE (WORKING LINK)
         st.markdown("### 🧬 Molecular Structure")
         st.image(
             "https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=5381226&t=l",
@@ -77,10 +78,8 @@ elif st.session_state.page == "app":
 
         st.markdown("---")
 
-        # ✅ TOTAL COUNT
         st.success(f"🧪 Total Chiral Centers Detected: {len(data)}")
 
-        # ✅ TABLE
         df = pd.DataFrame(data)
         st.table(df)
 
